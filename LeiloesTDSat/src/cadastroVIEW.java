@@ -1,7 +1,8 @@
 
+import javax.swing.JOptionPane;
+
 public class cadastroVIEW extends javax.swing.JFrame {
 
-   
     public cadastroVIEW() {
         initComponents();
     }
@@ -38,12 +39,6 @@ public class cadastroVIEW extends javax.swing.JFrame {
 
         jLabel5.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
         jLabel5.setText("Valor:");
-
-        cadastroNome.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                cadastroNomeActionPerformed(evt);
-            }
-        });
 
         btnCadastrar.setBackground(new java.awt.Color(153, 255, 255));
         btnCadastrar.setText("Cadastrar 💾");
@@ -124,27 +119,34 @@ public class cadastroVIEW extends javax.swing.JFrame {
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
-    private void cadastroNomeActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cadastroNomeActionPerformed
-        
-        
-    }//GEN-LAST:event_cadastroNomeActionPerformed
-
     private void btnCadastrarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCadastrarActionPerformed
         ProdutosDTO produto = new ProdutosDTO();
         String nome = cadastroNome.getText();
-        String valor = cadastroValor.getText();
-        String status = "A Venda";
-        produto.setNome(nome);
-        produto.setValor(Integer.parseInt(valor));
-        produto.setStatus(status);
-        
-        ProdutosDAO produtodao = new ProdutosDAO();
-        produtodao.cadastrarProduto(produto);
-        
+        String valorString = cadastroValor.getText();
+
+        // Verifica se o valor fornecido é um número válido
+        try {
+            int valor = Integer.parseInt(valorString);
+            String status = "A Venda";
+            produto.setNome(nome);
+            produto.setValor(valor);
+            produto.setStatus(status);
+
+            ProdutosDAO produtodao = new ProdutosDAO();
+            boolean cadastroSucesso = produtodao.cadastrarProduto(produto);
+
+            if (cadastroSucesso) {
+                JOptionPane.showMessageDialog(this, "Cadastro realizado com sucesso!", "Sucesso", JOptionPane.INFORMATION_MESSAGE);
+            } else {
+                JOptionPane.showMessageDialog(this, "Erro ao cadastrar produto", "Erro", JOptionPane.ERROR_MESSAGE);
+            }
+        } catch (NumberFormatException e) {
+            JOptionPane.showMessageDialog(this, "Valor inválido para o campo 'Valor'", "Erro", JOptionPane.ERROR_MESSAGE);
+        }
     }//GEN-LAST:event_btnCadastrarActionPerformed
 
     private void btnProdutosActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnProdutosActionPerformed
-        listagemVIEW listagem = new listagemVIEW(); 
+        listagemVIEW listagem = new listagemVIEW();
         listagem.setVisible(true);
     }//GEN-LAST:event_btnProdutosActionPerformed
 

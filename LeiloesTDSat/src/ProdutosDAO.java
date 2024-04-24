@@ -26,17 +26,22 @@ public class ProdutosDAO {
         this.conn = new conectaDAO().connectDB(); // Assumindo que a classe ConectaDAO esteja corretamente definida
     }
 
-    public void cadastrarProduto(ProdutosDTO produto) {
+    public boolean cadastrarProduto(ProdutosDTO produto) {
         try {
-            String sql = "INSERT INTO produtos (nome, valor, status) VALUES (?,?,'A Venda')";
+            String sql = "INSERT INTO produtos (nome, valor, status) VALUES (?,?,?)";
             PreparedStatement st = conn.prepareStatement(sql);
             st.setString(1, produto.getNome());
             st.setInt(2, produto.getValor());
-            st.executeUpdate();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
+            st.setString(3, produto.getStatus());
+        st.executeUpdate();
+        return true; 
+    } catch (SQLException e) {
+        e.printStackTrace();
+        return false; 
     }
+}
+        
+    
 
     public ArrayList<ProdutosDTO> listarProdutos() {
         ArrayList<ProdutosDTO> listagem = new ArrayList<>();
