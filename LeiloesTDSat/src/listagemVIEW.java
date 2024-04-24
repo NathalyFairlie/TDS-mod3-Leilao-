@@ -1,14 +1,20 @@
 
 import java.util.ArrayList;
+import javax.swing.JOptionPane;
 import javax.swing.table.DefaultTableModel;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+
 
 public class listagemVIEW extends javax.swing.JFrame {
-    
+
     public listagemVIEW() {
         initComponents();
         listarProdutos();
     }
-   
+
     @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
@@ -120,11 +126,50 @@ public class listagemVIEW extends javax.swing.JFrame {
 
     private void btnVenderActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnVenderActionPerformed
         String id = id_produto_venda.getText();
-        
-        ProdutosDAO produtosdao = new ProdutosDAO();
-        
-        //produtosdao.venderProduto(Integer.parseInt(id));
-        listarProdutos();
+
+        try {
+            int idv = Integer.parseInt(id);
+
+            ProdutosDAO produtosdao = new ProdutosDAO();
+            String status = produtosdao.getStatusProduto(idv);
+
+            if (status != null) {
+                if (status.equals("Vendido")) {
+                    JOptionPane.showMessageDialog(this, "O item já foi vendido", "Alerta", JOptionPane.WARNING_MESSAGE);
+                } else if (status.equals("A Venda")) {
+                    // Realiza uma consulta para obter os detalhes do produto
+                    String sql = "SELECT nome, valor FROM produtos WHERE id = ?";
+                    try (Connection conn = new conectaDAO().connectDB(); PreparedStatement ps = conn.prepareStatement(sql)) {
+                        ps.setInt(1, idv);
+                        ResultSet rs = ps.executeQuery();
+                        if (rs.next()) {
+                            String nome = rs.getString("nome");
+                            int valor = rs.getInt("valor");
+
+                            // Atualiza o status do produto para "Vendido"
+                            boolean atualizacaoSucesso = produtosdao.updateStatus(idv);
+                            if (atualizacaoSucesso) {
+                                // Atualiza a tabela de listagem
+                                listarProdutos();
+                                // Exibe uma mensagem informando ao usuário que o item foi vendido com sucesso
+                                JOptionPane.showMessageDialog(this, "O item '" + nome + "' foi vendido pelo valor R$ " + valor + " com sucesso.", "Venda realizada", JOptionPane.INFORMATION_MESSAGE);
+                            } else {
+                                JOptionPane.showMessageDialog(this, "Erro ao atualizar status do produto", "Erro", JOptionPane.ERROR_MESSAGE);
+                            }
+                        } else {
+                            JOptionPane.showMessageDialog(this, "ID não encontrado", "Erro", JOptionPane.ERROR_MESSAGE);
+                        }
+                    } catch (SQLException e) {
+                        e.printStackTrace();
+                    }
+                }
+            } else {
+                JOptionPane.showMessageDialog(this, "ID não encontrado", "Erro", JOptionPane.ERROR_MESSAGE);
+            }
+        } catch (NumberFormatException e) {
+            JOptionPane.showMessageDialog(this, "ID inválido", "Erro", JOptionPane.ERROR_MESSAGE);
+        }
+
     }//GEN-LAST:event_btnVenderActionPerformed
 
     private void btnVendasActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnVendasActionPerformed
@@ -184,16 +229,16 @@ public class listagemVIEW extends javax.swing.JFrame {
     private javax.swing.JTable listaProdutos;
     // End of variables declaration//GEN-END:variables
 
-    private void listarProdutos(){
+    private void listarProdutos() {
         try {
             ProdutosDAO produtosdao = new ProdutosDAO();
-            
+
             DefaultTableModel model = (DefaultTableModel) listaProdutos.getModel();
             model.setNumRows(0);
-            
+
             ArrayList<ProdutosDTO> listagem = produtosdao.listarProdutos();
-            
-            for(int i = 0; i < listagem.size(); i++){
+
+            for (int i = 0; i < listagem.size(); i++) {
                 model.addRow(new Object[]{
                     listagem.get(i).getId(),
                     listagem.get(i).getNome(),
@@ -204,6 +249,6 @@ public class listagemVIEW extends javax.swing.JFrame {
         } catch (Exception e) {
             e.printStackTrace();
         }
-    
+
     }
 }

@@ -68,15 +68,33 @@ public class ProdutosDAO {
         return listagem;
     }
 
-    public void updateStatus(int id) {
+    public boolean updateStatus(int id) {
         try {
             String sql = "UPDATE produtos SET status = 'Vendido' WHERE id = ?";
             PreparedStatement st = conn.prepareStatement(sql);
             st.setInt(1, id);
-            st.executeUpdate();
+            int rowsAffected = st.executeUpdate();
+            return rowsAffected > 0;
+            
         } catch (SQLException e) {
             e.printStackTrace();
+            return false;
         }
     }
+    
+    public String getStatusProduto(int id) {
+    try {
+        String sql = "SELECT status FROM produtos WHERE id = ?";
+        PreparedStatement st = conn.prepareStatement(sql);
+        st.setInt(1, id);
+        ResultSet rs = st.executeQuery();
+        if (rs.next()) {
+            return rs.getString("status");
+        }
+    } catch (SQLException e) {
+        e.printStackTrace();
+    }
+    return null; // Retorna null se houver algum erro ou se o ID não existir
+}
 
 }
