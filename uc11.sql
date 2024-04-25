@@ -7,6 +7,7 @@
 -- Versão do servidor: 10.4.24-MariaDB
 -- versão do PHP: 8.1.6
 
+
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
 SET time_zone = "+00:00";
@@ -20,7 +21,8 @@ SET time_zone = "+00:00";
 --
 -- Banco de dados: `uc11`
 --
-
+CREATE SCHEMA IF NOT EXISTS uc11;
+USE uc11;
 -- --------------------------------------------------------
 
 --
