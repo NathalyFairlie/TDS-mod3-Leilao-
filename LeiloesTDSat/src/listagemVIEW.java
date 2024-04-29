@@ -2,11 +2,6 @@
 import java.util.ArrayList;
 import javax.swing.JOptionPane;
 import javax.swing.table.DefaultTableModel;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-
 
 public class listagemVIEW extends javax.swing.JFrame {
 
@@ -131,36 +126,30 @@ public class listagemVIEW extends javax.swing.JFrame {
             int idv = Integer.parseInt(id);
 
             ProdutosDAO produtosdao = new ProdutosDAO();
+
+            // Obtém o status do produto
             String status = produtosdao.getStatusProduto(idv);
 
             if (status != null) {
                 if (status.equals("Vendido")) {
                     JOptionPane.showMessageDialog(this, "O item já foi vendido", "Alerta", JOptionPane.WARNING_MESSAGE);
                 } else if (status.equals("A Venda")) {
-                    // Realiza uma consulta para obter os detalhes do produto
-                    String sql = "SELECT nome, valor FROM produtos WHERE id = ?";
-                    try (Connection conn = new conectaDAO().connectDB(); PreparedStatement ps = conn.prepareStatement(sql)) {
-                        ps.setInt(1, idv);
-                        ResultSet rs = ps.executeQuery();
-                        if (rs.next()) {
-                            String nome = rs.getString("nome");
-                            int valor = rs.getInt("valor");
+                    // Obtém os detalhes do produto
+                    ProdutosDTO produto = produtosdao.obterDetalhesProduto(idv);
 
-                            // Atualiza o status do produto para "Vendido"
-                            boolean atualizacaoSucesso = produtosdao.updateStatus(idv);
-                            if (atualizacaoSucesso) {
-                                // Atualiza a tabela de listagem
-                                listarProdutos();
-                                // Exibe uma mensagem informando ao usuário que o item foi vendido com sucesso
-                                JOptionPane.showMessageDialog(this, "O item '" + nome + "' foi vendido pelo valor R$ " + valor + " com sucesso.", "Venda realizada", JOptionPane.INFORMATION_MESSAGE);
-                            } else {
-                                JOptionPane.showMessageDialog(this, "Erro ao atualizar status do produto", "Erro", JOptionPane.ERROR_MESSAGE);
-                            }
+                    if (produto != null) {
+                        // Atualiza o status do produto para "Vendido"
+                        boolean atualizacaoSucesso = produtosdao.venderProduto(idv);
+                        if (atualizacaoSucesso) {
+                            // Atualiza a tabela de listagem
+                            listarProdutos();
+                            // Exibe uma mensagem informando ao usuário que o item foi vendido com sucesso
+                            JOptionPane.showMessageDialog(this, "O item '" + produto.getNome() + "' foi vendido pelo valor R$ " + produto.getValor() + " com sucesso.", "Venda realizada", JOptionPane.INFORMATION_MESSAGE);
                         } else {
-                            JOptionPane.showMessageDialog(this, "ID não encontrado", "Erro", JOptionPane.ERROR_MESSAGE);
+                            JOptionPane.showMessageDialog(this, "Erro ao atualizar status do produto", "Erro", JOptionPane.ERROR_MESSAGE);
                         }
-                    } catch (SQLException e) {
-                        e.printStackTrace();
+                    } else {
+                        JOptionPane.showMessageDialog(this, "ID não encontrado", "Erro", JOptionPane.ERROR_MESSAGE);
                     }
                 }
             } else {
@@ -169,7 +158,6 @@ public class listagemVIEW extends javax.swing.JFrame {
         } catch (NumberFormatException e) {
             JOptionPane.showMessageDialog(this, "ID inválido", "Erro", JOptionPane.ERROR_MESSAGE);
         }
-
     }//GEN-LAST:event_btnVenderActionPerformed
 
     private void btnVendasActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnVendasActionPerformed
